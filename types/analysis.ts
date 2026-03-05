@@ -91,6 +91,38 @@ export interface SpeedResult {
   }
 }
 
+// ─── PageSpeed API ──────────────────────────────────────────
+
+export interface PageSpeedAudit {
+  score: number | null
+  numericValue?: number
+  displayValue?: string
+  details?: {
+    items?: unknown[]
+    overallSavingsMs?: number
+  }
+}
+
+export interface PageSpeedApiResponse {
+  lighthouseResult: {
+    categories: {
+      performance?: { score: number | null }
+    }
+    audits: {
+      'largest-contentful-paint'?: PageSpeedAudit
+      'experimental-interaction-to-next-paint'?: PageSpeedAudit
+      'cumulative-layout-shift'?: PageSpeedAudit
+      'first-contentful-paint'?: PageSpeedAudit
+      'server-response-time'?: PageSpeedAudit
+      'total-byte-weight'?: PageSpeedAudit
+      'uses-optimized-images'?: PageSpeedAudit
+      'render-blocking-resources'?: PageSpeedAudit
+      'uses-text-compression'?: PageSpeedAudit
+      'uses-long-cache-ttl'?: PageSpeedAudit
+    }
+  }
+}
+
 // ─── Aggregate ──────────────────────────────────────────────
 
 export interface AnalysisResult {
