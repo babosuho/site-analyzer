@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { BarChart3 } from 'lucide-react'
 
+export const runtime = 'edge'
+
 type Step = 'email' | 'otp'
 
 export default function LoginPage() {

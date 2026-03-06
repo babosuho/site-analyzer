@@ -5,6 +5,8 @@ import { TrendChart } from '@/components/history/TrendChart'
 import { HistoryTable } from '@/components/history/HistoryTable'
 import type { AnalysisRow } from '@/types/analysis'
 
+export const runtime = 'edge'
+
 export default function HistoryPage() {
   const [analyses, setAnalyses] = useState<AnalysisRow[]>([])
   const [isLoading, setIsLoading] = useState(true)

@@ -5,6 +5,8 @@ import { Plus, Trash2, Bell, BellOff, RefreshCw } from 'lucide-react'
 import type { MonitorRow } from '@/types/analysis'
 import { cn } from '@/lib/cn'
 
+export const runtime = 'edge'
+
 const CATEGORIES = ['seo', 'aeo', 'geo', 'speed'] as const
 
 function normalizeUrl(input: string): string {

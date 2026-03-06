@@ -5,6 +5,8 @@ import { Plus, Trash2, Globe, Webhook } from 'lucide-react'
 import type { WebhookRow } from '@/types/analysis'
 import { cn } from '@/lib/cn'
 
+export const runtime = 'edge'
+
 type WebhookType = 'slack' | 'discord'
 
 export default function SettingsPage() {
