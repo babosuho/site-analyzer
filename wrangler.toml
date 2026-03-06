@@ -1,0 +1,13 @@
+name = "site-analyzer"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "site-analyzer-db"
+database_id = "35fc4be6-906c-4338-9845-b11b85f7ca2b"
+
+[vars]
+NEXT_PUBLIC_APP_URL = "https://pahechit.gptstore.or.kr"
+RESEND_FROM_EMAIL = "noreply@pahechit.gptstore.or.kr"

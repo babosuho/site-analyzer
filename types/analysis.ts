@@ -123,16 +123,82 @@ export interface PageSpeedApiResponse {
   }
 }
 
+// ─── Categories ─────────────────────────────────────────────
+
+export type AnalysisCategory = 'seo' | 'aeo' | 'geo' | 'speed'
+
+// ─── AI Insights ────────────────────────────────────────────
+
+export interface AiInsights {
+  contentQuality: string        // 콘텐츠 품질 자연어 평가
+  topRecommendations: string[]  // 우선순위 개선 항목 (최대 3개)
+  keywords: string[]            // 핵심 키워드 추출
+  eeatScore: number             // EEAT 신뢰도 점수 (0-100)
+}
+
+// ─── API Usage ──────────────────────────────────────────────
+
+export interface ApiUsage {
+  inputTokens: number
+  outputTokens: number
+  costUsd: number
+}
+
 // ─── Aggregate ──────────────────────────────────────────────
 
 export interface AnalysisResult {
+  id?: string                 // DB 저장 후 생성
   url: string
   analyzedAt: string
   overallScore: number
-  seo: SeoResult
-  aeo: AeoResult
-  geo: GeoResult
-  speed: SpeedResult
+  categories: AnalysisCategory[]
+  seo?: SeoResult
+  aeo?: AeoResult
+  geo?: GeoResult
+  speed?: SpeedResult
+  aiInsights?: AiInsights
+  usage?: ApiUsage
 }
 
 export type SeverityLevel = 'critical' | 'warning' | 'info'
+
+// ─── DB Row Types ────────────────────────────────────────────
+
+export interface AnalysisRow {
+  id: string
+  user_id: string
+  url: string
+  categories: string
+  overall_score: number
+  seo_score: number | null
+  aeo_score: number | null
+  geo_score: number | null
+  speed_score: number | null
+  result_json: string
+  ai_input_tokens: number
+  ai_output_tokens: number
+  ai_cost_usd: number
+  created_at: string
+}
+
+export interface MonitorRow {
+  id: string
+  user_id: string
+  url: string
+  categories: string
+  schedule: 'daily' | 'weekly'
+  last_run_at: string | null
+  last_score: number | null
+  alert_threshold: number
+  is_active: number
+  created_at: string
+}
+
+export interface WebhookRow {
+  id: string
+  user_id: string
+  type: 'slack' | 'discord'
+  url: string
+  events: string
+  is_active: number
+}

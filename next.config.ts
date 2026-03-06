@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // Cloudflare Pages (next-on-pages) 호환 설정
+}
 
-export default nextConfig;
+export default nextConfig
+

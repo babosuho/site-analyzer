@@ -166,10 +166,10 @@ function Results({ result }: { result: AnalysisResult }) {
           {/* 카테고리 점수 요약 */}
           <div className="mt-3 flex gap-3 justify-center sm:justify-start">
             {[
-              { label: 'SEO', score: result.seo.score },
-              { label: 'AEO', score: result.aeo.score },
-              { label: 'GEO', score: result.geo.score },
-              { label: 'Speed', score: result.speed.score },
+              { label: 'SEO', score: result.seo?.score ?? 0 },
+              { label: 'AEO', score: result.aeo?.score ?? 0 },
+              { label: 'GEO', score: result.geo?.score ?? 0 },
+              { label: 'Speed', score: result.speed?.score ?? 0 },
             ].map(({ label, score }) => {
               const color = score >= 80 ? 'text-green-600' : score >= 60 ? 'text-amber-600' : 'text-red-600'
               return (
@@ -189,30 +189,30 @@ function Results({ result }: { result: AnalysisResult }) {
           title="SEO"
           subtitle="Search Engine Optimization"
           icon="🔍"
-          score={result.seo.score}
-          issues={result.seo.issues}
+          score={result.seo?.score ?? 0}
+          issues={result.seo?.issues ?? []}
         />
         <CategoryCard
           title="AEO"
           subtitle="Answer Engine Optimization"
           icon="💬"
-          score={result.aeo.score}
-          issues={result.aeo.issues}
+          score={result.aeo?.score ?? 0}
+          issues={result.aeo?.issues ?? []}
         />
         <CategoryCard
           title="GEO"
           subtitle="Generative Engine Optimization"
           icon="🤖"
-          score={result.geo.score}
-          issues={result.geo.issues}
+          score={result.geo?.score ?? 0}
+          issues={result.geo?.issues ?? []}
         />
         <CategoryCard
           title="Speed"
           subtitle="Core Web Vitals & 성능"
           icon="⚡"
-          score={result.speed.score}
-          issues={result.speed.issues}
-          cwv={result.speed.coreWebVitals}
+          score={result.speed?.score ?? 0}
+          issues={result.speed?.issues ?? []}
+          cwv={result.speed?.coreWebVitals}
         />
       </div>
     </div>

@@ -1,0 +1,8 @@
+# Cloudflare Pages 로컬 개발용 환경변수 (.dev.vars 로 복사 후 사용)
+# wrangler pages dev 실행 시 자동으로 로드됩니다.
+
+GEMINI_API_KEY=AIzaSy-xxxxx
+RESEND_API_KEY=re_xxxxx
+RESEND_FROM_EMAIL=noreply@pahechit.gptstore.or.kr
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+NEXT_PUBLIC_APP_URL=http://localhost:3000
