@@ -1,6 +1,9 @@
-import { nanoid } from 'nanoid'
 import type { User } from '@/types/auth'
 import type { AnalysisResult, AnalysisRow, MonitorRow, WebhookRow } from '@/types/analysis'
+
+function lastRowId(result: D1Result): string {
+  return String((result.meta as { last_row_id: number }).last_row_id)
+}
 
 // ─── Users ────────────────────────────────────────────────────
 
@@ -8,20 +11,19 @@ export async function getUserByEmail(db: D1Database, email: string): Promise<Use
   const row = await db
     .prepare('SELECT id, email, created_at, last_login_at FROM users WHERE email = ?')
     .bind(email)
-    .first<{ id: string; email: string; created_at: string; last_login_at: string | null }>()
+    .first<{ id: string | number; email: string; created_at: string; last_login_at: string | null }>()
 
   if (!row) return null
-  return { id: row.id, email: row.email, createdAt: row.created_at, lastLoginAt: row.last_login_at }
+  return { id: String(row.id), email: row.email, createdAt: row.created_at, lastLoginAt: row.last_login_at }
 }
 
 export async function createUser(db: D1Database, email: string): Promise<User> {
-  const id = nanoid()
-  await db
-    .prepare('INSERT INTO users (id, email) VALUES (?, ?)')
-    .bind(id, email)
+  const result = await db
+    .prepare('INSERT INTO users (email) VALUES (?)')
+    .bind(email)
     .run()
 
-  return { id, email, createdAt: new Date().toISOString(), lastLoginAt: null }
+  return { id: lastRowId(result), email, createdAt: new Date().toISOString(), lastLoginAt: null }
 }
 
 export async function upsertUser(db: D1Database, email: string): Promise<User> {
@@ -32,7 +34,7 @@ export async function upsertUser(db: D1Database, email: string): Promise<User> {
 
 export async function updateLastLogin(db: D1Database, userId: string): Promise<void> {
   await db
-    .prepare('UPDATE users SET last_login_at = datetime(\'now\') WHERE id = ?')
+    .prepare("UPDATE users SET last_login_at = datetime('now') WHERE id = ?")
     .bind(userId)
     .run()
 }
@@ -40,11 +42,10 @@ export async function updateLastLogin(db: D1Database, userId: string): Promise<v
 // ─── OTP ─────────────────────────────────────────────────────
 
 export async function createOtp(db: D1Database, email: string, token: string): Promise<void> {
-  const id = nanoid()
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10분
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
   await db
-    .prepare('INSERT INTO otp_tokens (id, email, token, expires_at) VALUES (?, ?, ?, ?)')
-    .bind(id, email, token, expiresAt)
+    .prepare('INSERT INTO otp_tokens (email, token, expires_at) VALUES (?, ?, ?)')
+    .bind(email, token, expiresAt)
     .run()
 }
 
@@ -58,7 +59,7 @@ export async function verifyAndConsumeOtp(
       'SELECT id, expires_at, used FROM otp_tokens WHERE email = ? AND token = ? ORDER BY created_at DESC LIMIT 1'
     )
     .bind(email, token)
-    .first<{ id: string; expires_at: string; used: number }>()
+    .first<{ id: string | number; expires_at: string; used: number }>()
 
   if (!row) return false
   if (row.used === 1) return false
@@ -75,16 +76,14 @@ export async function saveAnalysis(
   userId: string,
   result: AnalysisResult
 ): Promise<string> {
-  const id = nanoid()
-  await db
+  const res = await db
     .prepare(
       `INSERT INTO analyses
-       (id, user_id, url, categories, overall_score, seo_score, aeo_score, geo_score, speed_score,
+       (user_id, url, categories, overall_score, seo_score, aeo_score, geo_score, speed_score,
         result_json, ai_input_tokens, ai_output_tokens, ai_cost_usd)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
-      id,
       userId,
       result.url,
       JSON.stringify(result.categories),
@@ -100,7 +99,7 @@ export async function saveAnalysis(
     )
     .run()
 
-  return id
+  return lastRowId(res)
 }
 
 export async function getAnalysesByUser(
@@ -109,9 +108,7 @@ export async function getAnalysesByUser(
   limit = 20
 ): Promise<AnalysisRow[]> {
   const { results } = await db
-    .prepare(
-      'SELECT * FROM analyses WHERE user_id = ? ORDER BY created_at DESC LIMIT ?'
-    )
+    .prepare('SELECT * FROM analyses WHERE user_id = ? ORDER BY created_at DESC LIMIT ?')
     .bind(userId, limit)
     .all<AnalysisRow>()
 
@@ -125,9 +122,7 @@ export async function getAnalysesForUrl(
   limit = 30
 ): Promise<AnalysisRow[]> {
   const { results } = await db
-    .prepare(
-      'SELECT * FROM analyses WHERE user_id = ? AND url = ? ORDER BY created_at ASC LIMIT ?'
-    )
+    .prepare('SELECT * FROM analyses WHERE user_id = ? AND url = ? ORDER BY created_at ASC LIMIT ?')
     .bind(userId, url, limit)
     .all<AnalysisRow>()
 
@@ -162,15 +157,14 @@ export async function createMonitor(
   userId: string,
   data: { url: string; categories: string[]; schedule: 'daily' | 'weekly'; alertThreshold: number }
 ): Promise<string> {
-  const id = nanoid()
-  await db
+  const res = await db
     .prepare(
-      'INSERT INTO monitors (id, user_id, url, categories, schedule, alert_threshold) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO monitors (user_id, url, categories, schedule, alert_threshold) VALUES (?, ?, ?, ?, ?)'
     )
-    .bind(id, userId, data.url, JSON.stringify(data.categories), data.schedule, data.alertThreshold)
+    .bind(userId, data.url, JSON.stringify(data.categories), data.schedule, data.alertThreshold)
     .run()
 
-  return id
+  return lastRowId(res)
 }
 
 export async function getMonitorsByUser(db: D1Database, userId: string): Promise<MonitorRow[]> {
@@ -196,7 +190,7 @@ export async function updateMonitorLastRun(
   score: number
 ): Promise<void> {
   await db
-    .prepare('UPDATE monitors SET last_run_at = datetime(\'now\'), last_score = ? WHERE id = ?')
+    .prepare("UPDATE monitors SET last_run_at = datetime('now'), last_score = ? WHERE id = ?")
     .bind(score, id)
     .run()
 }
@@ -219,15 +213,12 @@ export async function saveWebhook(
   userId: string,
   data: { type: 'slack' | 'discord'; url: string; events: string[] }
 ): Promise<string> {
-  const id = nanoid()
-  await db
-    .prepare(
-      'INSERT INTO webhooks (id, user_id, type, url, events) VALUES (?, ?, ?, ?, ?)'
-    )
-    .bind(id, userId, data.type, data.url, JSON.stringify(data.events))
+  const res = await db
+    .prepare('INSERT INTO webhooks (user_id, type, url, events) VALUES (?, ?, ?, ?)')
+    .bind(userId, data.type, data.url, JSON.stringify(data.events))
     .run()
 
-  return id
+  return lastRowId(res)
 }
 
 export async function getWebhooksByUser(db: D1Database, userId: string): Promise<WebhookRow[]> {
