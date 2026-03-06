@@ -10,4 +10,4 @@ database_id = "35fc4be6-906c-4338-9845-b11b85f7ca2b"
 
 [vars]
 NEXT_PUBLIC_APP_URL = "https://pahechit.gptstore.or.kr"
-RESEND_FROM_EMAIL = "noreply@pahechit.gptstore.or.kr"
+RESEND_FROM_EMAIL = "noreply@mail.gptstore.or.kr"
